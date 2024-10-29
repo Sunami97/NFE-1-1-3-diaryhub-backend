@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 const { MONGO_URI, JWT_SECRET } = process.env;
 
 //app.use(cors());
-const allowedOrigins = ['http://127.0.0.1:5500', 'https://your-frontend-url.com'];
+const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:3000'];
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
