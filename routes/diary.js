@@ -207,6 +207,23 @@ router.get('/public-diaries/location/:state', async (req, res) => {
     }
 });
 
+// 특정 ID의 일기 정보 조회 API
+router.get('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const diary = await Diary.findById(id).populate('user', '_id username');
+        if (!diary) {
+            return res.status(404).json({ message: '해당 일기를 찾을 수 없습니다.' });
+        }
+
+        res.json(diary);
+    } catch (error) {
+        console.error('일기 조회 오류:', error.message);
+        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
+    }
+});
+
 // 친구의 일기 목록 조회
 router.get('/friend/:friendId', async (req, res) => {
     try {
