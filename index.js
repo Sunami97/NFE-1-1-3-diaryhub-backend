@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 // 정적 파일 경로 설정 (이미지 제공)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB 연결
 mongoose.connect(MONGO_URI)
@@ -38,8 +38,8 @@ const authMiddleware = (req, res, next) => {
 };
 
 // 라우트 설정
-app.use('/auth', authRoutes);
-app.use('/diaries', authMiddleware, diaryRoutes);
+app.use('auth', authRoutes);
+app.use('diaries', authMiddleware, diaryRoutes);
 
 // 서버 시작
 app.listen(PORT, () => console.log(`서버가 ${PORT}번 포트에서 실행 중입니다.`));
