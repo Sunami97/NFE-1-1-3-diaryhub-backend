@@ -49,8 +49,8 @@ const authMiddleware = (req, res, next) => {
 };
 
 // 라우트 설정
-app.use('auth', authRoutes);
-app.use('diaries', authMiddleware, diaryRoutes);
+app.use('/auth', authRoutes);
+app.use('/diaries', authMiddleware, diaryRoutes);
 
 // 기본 라우트
 app.get('/', (req, res) => {
