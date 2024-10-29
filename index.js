@@ -12,7 +12,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const { MONGO_URI, JWT_SECRET } = process.env;
 
-app.use(cors());
+//app.use(cors());
+const allowedOrigins = ['http://127.0.0.1:5500', 'https://your-frontend-url.com'];
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS 정책에 의해 차단된 출처입니다.'));
+        }
+    },
+}));
+
 app.use(express.json());
 
 // 정적 파일 경로 설정 (이미지 제공)
