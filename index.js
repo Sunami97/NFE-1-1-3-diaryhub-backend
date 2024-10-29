@@ -41,5 +41,10 @@ const authMiddleware = (req, res, next) => {
 app.use('auth', authRoutes);
 app.use('diaries', authMiddleware, diaryRoutes);
 
+// 기본 라우트
+app.get('/', (req, res) => {
+    res.send('Express 서버가 정상적으로 동작하고 있습니다.');
+});
+
 // 서버 시작
 app.listen(PORT, () => console.log(`서버가 ${PORT}번 포트에서 실행 중입니다.`));
