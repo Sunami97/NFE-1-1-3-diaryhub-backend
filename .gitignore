@@ -30,8 +30,10 @@ dist-ssr
 .env.production.local
 .env.local
 
-# upload 폴더의 모든 파일 무시
+# uploads 폴더의 파일들 무시
 uploads/*
+# .gitkeep 파일은 예외로 허용
+!uploads/.gitkeep
 
 # 예외: 폴더 구조를 유지하기 위해 빈 파일을 포함
 !.gitkeep
