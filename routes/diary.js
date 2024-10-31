@@ -2,9 +2,11 @@ const express = require('express');
 const Diary = require('../models/Diary');
 const router = express.Router();
 const upload = require('../config/cloudinary');
+const cloudinary = require('cloudinary').v2;
+const authMiddleware = require('../middleware/auth');
 
 // 다이어리 생성 API (여러 이미지 처리)
-router.post('/', upload.array('images', 10), async (req, res) => {
+router.post('/', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
         const { title, content, mood, weather, diaryDate, isPublic } = req.body;
         const state = req.body.state;
@@ -46,7 +48,7 @@ router.post('/', upload.array('images', 10), async (req, res) => {
 });
 
 //다이어리 수정
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         const { title, content, mood, weather, diaryDate, isPublic } = req.body;
@@ -76,7 +78,7 @@ router.put('/:id', async (req, res) => {
 });
 
 //댓글 작성
-router.post('/:id/comments', async (req, res) => {
+router.post('/:id/comments', authMiddleware, async (req, res) => {
     try {
         const { content } = req.body;
         const diaryId = req.params.id;
@@ -113,7 +115,7 @@ router.get('/:id/comments', async (req, res) => {
 });
 
 //댓글 삭제
-router.delete('/:diaryId/comments/:commentId', async (req, res) => {
+router.delete('/:diaryId/comments/:commentId', authMiddleware, async (req, res) => {
     try {
         const { diaryId, commentId } = req.params;
 
@@ -141,7 +143,7 @@ router.delete('/:diaryId/comments/:commentId', async (req, res) => {
 
 
 //나의 일기 조회
-router.get('/my-diaries', async (req, res) => {
+router.get('/my-diaries', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.userId;
 
@@ -159,17 +161,29 @@ router.get('/my-diaries', async (req, res) => {
 //공개된 일기 조회
 router.get('/public-diaries', async (req, res) => {
     try {
-        const userId = req.user.userId; // 현재 로그인한 사용자 ID
+        const userId = req.user && req.user.userId; // 현재 로그인한 사용자 ID
+        let publicDiaries = '';
 
         // 본인의 일기를 제외하고 공개된 일기만 조회
-        const publicDiaries = await Diary.find({
-            isPublic: true,
-            user: { $ne: userId }  // 본인의 일기 제외
-        })
-            .populate('user', '_id username')  // 작성자 정보 포함
-            .sort({ createdAt: -1 });
+        if (userId) {
+            publicDiaries = await Diary.find({
+                isPublic: true,
+                user: { $ne: userId }  // 본인의 일기 제외
+            })
+                .populate('user', '_id username')  // 작성자 정보 포함
+                .sort({ createdAt: -1 });
 
-        res.json(publicDiaries);
+            res.json(publicDiaries);
+        } else {
+            publicDiaries = await Diary.find({
+                isPublic: true,
+            })
+                .populate('user', '_id username')  // 작성자 정보 포함
+                .sort({ createdAt: -1 });
+
+            res.json(publicDiaries);
+        }
+
     } catch (error) {
         console.error('공개된 일기 조회 오류:', error.message);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
@@ -225,7 +239,7 @@ router.get('/friend/:friendId', async (req, res) => {
 });
 
 // 일기 삭제
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const diaryId = req.params.id;
 
@@ -240,6 +254,10 @@ router.delete('/:id', async (req, res) => {
             return res.status(403).json({ message: '본인의 일기만 삭제할 수 있습니다.' });
         }
 
+        for (const image of diary.images) {
+            await cloudinary.uploader.destroy(image.public_id);
+        }
+
         await Diary.findByIdAndDelete(diaryId);
         res.status(200).json({ message: '일기가 삭제되었습니다.' });
     } catch (error) {
@@ -249,7 +267,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 //좋아요 
-router.post('/like/:id', async (req, res) => {
+router.post('/like/:id', authMiddleware, async (req, res) => {
     try {
         const diary = await Diary.findById(req.params.id);
 

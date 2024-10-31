@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
-const { JWT_SECRET } = process.env;
+const authMiddleware = require('../middleware/auth');
 
 // 회원가입
 router.post('/signup', async (req, res) => {
@@ -62,14 +62,32 @@ router.post('/login', async (req, res) => {
 });
 
 // 회원 탈퇴
-router.delete('/delete', async (req, res) => {
+router.delete('/delete', authMiddleware, async (req, res) => {
     try {
-        const { userId } = req.user;
+        const userId = req.user.userId;
+
+        // 사용자가 작성한 모든 다이어리 가져오기
+        const userDiaries = await Diary.find({ user: userId });
+
+        // Cloudinary에서 사용자의 모든 다이어리 이미지 삭제
+        for (const diary of userDiaries) {
+            for (const image of diary.images) {
+                await cloudinary.uploader.destroy(image.public_id);
+            }
+        }
+
+        // 사용자의 다이어리 삭제
+        await Diary.deleteMany({ user: userId });
+
+        // 사용자 계정 삭제
         await User.findByIdAndDelete(userId);
-        res.json({ message: '회원 탈퇴 완료' });
+
+        res.status(200).json({ message: '회원 탈퇴가 완료되었습니다.' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('회원 탈퇴 오류:', error.message);
+        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 });
+
 
 module.exports = router;
