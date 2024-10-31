@@ -1,17 +1,7 @@
 const express = require('express');
 const Diary = require('../models/Diary');
 const router = express.Router();
-const multer = require('multer');
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    },
-});
-const upload = multer({ storage });
+const upload = require('../config/cloudinary');
 
 // 다이어리 생성 API (여러 이미지 처리)
 router.post('/', upload.array('images', 10), async (req, res) => {
