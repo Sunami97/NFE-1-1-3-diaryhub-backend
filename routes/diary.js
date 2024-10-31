@@ -40,7 +40,7 @@ router.post('/', upload.array('images', 10), async (req, res) => {
         await newDiary.save();
         res.status(201).json(newDiary);
     } catch (error) {
-        console.error('일기 작성 오류:', error.message);
+        console.error('일기 작성 오류:', error);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 });
