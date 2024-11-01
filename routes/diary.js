@@ -8,12 +8,7 @@ const authMiddleware = require('../middleware/auth');
 // 다이어리 생성 API (여러 이미지 처리)
 router.post('/', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
-        const { title, content, mood, weather, diaryDate, isPublic } = req.body;
-        const state = req.body.state;
-
-        if (!state) {
-            return res.status(400).json({ message: '시/도(state) 값이 필요합니다.' });
-        }
+        const { title, content, mood, weather, diaryDate, isPublic, state } = req.body;
 
         let latitude = parseFloat(req.body.latitude);
         let longitude = parseFloat(req.body.longitude);
@@ -48,10 +43,13 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
 });
 
 //다이어리 수정
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, mood, weather, diaryDate, isPublic } = req.body;
+        const { title, content, mood, weather, diaryDate, isPublic, state } = req.body;
+
+        let latitude = parseFloat(req.body.latitude);
+        let longitude = parseFloat(req.body.longitude);
 
         const diary = await Diary.findById(id);
         if (!diary) return res.status(404).json({ message: '일기를 찾을 수 없습니다.' });
@@ -61,6 +59,19 @@ router.put('/:id', authMiddleware, async (req, res) => {
             return res.status(403).json({ message: '본인 일기만 수정할 수 있습니다.' });
         }
 
+        // Cloudinary에 저장된 기존 이미지 삭제
+        if (req.files.length > 0) {
+            for (const image of diary.images) {
+                await cloudinary.uploader.destroy(image.public_id);
+            }
+
+            // 새로운 이미지 업로드
+            diary.images = req.files.map((file) => file.path);
+
+            // 첫 번째 이미지를 썸네일로 설정
+            diary.thumbnail = diary.images[0].url;
+        }
+
         // 수정된 데이터 적용
         diary.title = title;
         diary.content = content;
@@ -68,6 +79,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
         diary.weather = weather;
         diary.diaryDate = new Date(diaryDate);
         diary.isPublic = isPublic === 'true';
+        diary.location = {
+            state,
+            coordinates: {
+                latitude: isNaN(latitude) ? 0.0 : latitude,
+                longitude: isNaN(longitude) ? 0.0 : longitude,
+            },
+        };
 
         await diary.save();
         res.status(200).json(diary);
