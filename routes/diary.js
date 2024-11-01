@@ -16,12 +16,9 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
         if (isNaN(latitude)) latitude = 0.0;
         if (isNaN(longitude)) longitude = 0.0;
 
-        const imageUploads = await Promise.all(req.files.map(async (file) => {
-            const uploadedImage = await cloudinary.uploader.upload(file.path);
-            return {
-                url: String(uploadedImage.secure_url),
-                public_id: uploadedImage.public_id,
-            };
+        const imageUploads = req.files.map((file) => ({
+            url: file.path,
+            public_id: file.filename,
         }));
 
         const newDiary = new Diary({
@@ -71,12 +68,9 @@ router.put('/:id', authMiddleware, upload.array('images', 10), async (req, res) 
                 await cloudinary.uploader.destroy(image.public_id);
             }
 
-            const imageUploads = await Promise.all(req.files.map(async (file) => {
-                const uploadedImage = await cloudinary.uploader.upload(file.path);
-                return {
-                    url: String(uploadedImage.secure_url),
-                    public_id: uploadedImage.public_id,
-                };
+            const imageUploads = req.files.map((file) => ({
+                url: file.path,
+                public_id: file.filename,
             }));
 
             diary.images = imageUploads;
