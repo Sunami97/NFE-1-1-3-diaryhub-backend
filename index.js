@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 const { MONGO_URI } = process.env;
 
 //app.use(cors());
-const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:3000'];
+const allowedOrigins = ['http://127.0.0.1:5500', 'http://localhost:3000', 'https://nfe-1-1-3-diaryhub.vercel.app'];
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
