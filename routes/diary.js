@@ -16,7 +16,13 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
         if (isNaN(latitude)) latitude = 0.0;
         if (isNaN(longitude)) longitude = 0.0;
 
-        const imagePaths = req.files.map((file) => file.path);
+        const imageUploads = await Promise.all(req.files.map(async (file) => {
+            const uploadedImage = await cloudinary.uploader.upload(file.path);
+            return {
+                url: uploadedImage.secure_url,
+                public_id: uploadedImage.public_id,
+            };
+        }));
 
         const newDiary = new Diary({
             user: req.user.userId,
@@ -30,8 +36,8 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
             weather,
             diaryDate: new Date(diaryDate),
             isPublic: isPublic === 'true',
-            images: imagePaths,
-            thumbnail: imagePaths[0],
+            images: imageUploads,
+            thumbnail: imageUploads[0].url
         });
 
         await newDiary.save();
@@ -65,11 +71,17 @@ router.put('/:id', authMiddleware, upload.array('images', 10), async (req, res) 
                 await cloudinary.uploader.destroy(image.public_id);
             }
 
-            // 새로운 이미지 업로드
-            diary.images = req.files.map((file) => file.path);
+            const imageUploads = await Promise.all(req.files.map(async (file) => {
+                const uploadedImage = await cloudinary.uploader.upload(file.path);
+                return {
+                    url: uploadedImage.secure_url,
+                    public_id: uploadedImage.public_id,
+                };
+            }));
 
-            // 첫 번째 이미지를 썸네일로 설정
-            diary.thumbnail = diary.images[0].url;
+            diary.images = imageUploads;
+
+            diary.thumbnail = imageUploads[0].url;
         }
 
         // 수정된 데이터 적용

@@ -12,7 +12,12 @@ const diarySchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true },
     content: { type: String, required: true },
-    images: [{ type: String }],
+    images: [
+        {
+            url: { type: String, required: true },
+            public_id: { type: String, required: true }
+        }
+    ],
     thumbnail: { type: String },
     location: {
         state: { type: String, required: true },
