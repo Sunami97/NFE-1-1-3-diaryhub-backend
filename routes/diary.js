@@ -19,7 +19,7 @@ router.post('/', authMiddleware, upload.array('images', 10), async (req, res) =>
         const imageUploads = await Promise.all(req.files.map(async (file) => {
             const uploadedImage = await cloudinary.uploader.upload(file.path);
             return {
-                url: uploadedImage.secure_url,
+                url: String(uploadedImage.secure_url),
                 public_id: uploadedImage.public_id,
             };
         }));
@@ -74,7 +74,7 @@ router.put('/:id', authMiddleware, upload.array('images', 10), async (req, res) 
             const imageUploads = await Promise.all(req.files.map(async (file) => {
                 const uploadedImage = await cloudinary.uploader.upload(file.path);
                 return {
-                    url: uploadedImage.secure_url,
+                    url: String(uploadedImage.secure_url),
                     public_id: uploadedImage.public_id,
                 };
             }));
