@@ -194,15 +194,26 @@ router.get('/public-diaries', async (req, res) => {
 router.get('/public-diaries/location/:state', async (req, res) => {
     try {
         const { state } = req.params; // 요청된 시/도 정보
-        const userId = req.user.userId // 현재 로그인한 사용자 ID
+        const userId = req.user && req.user.userId; // 현재 로그인한 사용자 ID
 
-        const publicDiaries = await Diary.find({
-            isPublic: true,
-            user: { $ne: userId },  // 본인의 일기 제외
-            'location.state': state, // 해당 지역의 일기만 필터링
-        })
-            .populate('user', '_id username')
-            .sort({ createdAt: -1 });
+        let publicDiaries = '';
+
+        if (userId) {
+            publicDiaries = await Diary.find({
+                isPublic: true,
+                user: { $ne: userId },  // 본인의 일기 제외
+                'location.state': state, // 해당 지역의 일기만 필터링
+            })
+                .populate('user', '_id username')
+                .sort({ createdAt: -1 });
+        } else {
+            publicDiaries = await Diary.find({
+                isPublic: true,
+                'location.state': state, // 해당 지역의 일기만 필터링
+            })
+                .populate('user', '_id username')
+                .sort({ createdAt: -1 });
+        }
 
         res.json(publicDiaries);
     } catch (error) {
