@@ -51,7 +51,7 @@ router.post('/login', async (req, res) => {
         }
 
         // JWT 토큰 발급
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
         console.log('로그인 성공:', username);
 
         res.json({ token });
