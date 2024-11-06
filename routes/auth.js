@@ -3,63 +3,71 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 
 // 회원가입
 router.post('/signup', async (req, res) => {
-    const { username, password } = req.body;
-
     try {
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.status(400).json({ message: '이미 존재하는 유저명입니다.' });
+        const { userId, username, password } = req.body;
+
+        // 중복 체크
+        const existingUserByUserId = await User.findOne({ userId });
+        if (existingUserByUserId) {
+            return res.status(400).json({ message: '이미 존재하는 User ID입니다.' });
         }
 
-        const newUser = new User({ username, password });
+        const existingUserByUsername = await User.findOne({ username });
+        if (existingUserByUsername) {
+            return res.status(400).json({ message: '이미 존재하는 사용자 이름입니다.' });
+        }
+
+        // 새로운 유저 생성 및 저장
+        const newUser = new User({
+            userId,
+            username,
+            password
+        });
         await newUser.save();
 
-        res.status(201).json({ message: '회원가입 성공', userId: newUser._id });
+        res.status(201).json({ message: '회원가입이 완료되었습니다.' });
     } catch (error) {
-        console.error('회원가입 중 오류 발생:', error.message);
+        console.error('회원가입 오류:', error);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 });
+
 
 // 로그인 및 토큰 발급
 router.post('/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { userId, password } = req.body;
 
-        // 요청 값 검증
-        if (!username || !password) {
-            console.error('유저명 또는 비밀번호가 누락되었습니다.');
-            return res.status(400).json({ message: '유저명과 비밀번호를 입력하세요.' });
-        }
-
-        // 유저 조회
-        const user = await User.findOne({ username });
+        // userId로 사용자 찾기
+        const user = await User.findOne({ userId });
         if (!user) {
-            console.error('유저를 찾을 수 없습니다:', username);
-            return res.status(404).json({ message: '유저를 찾을 수 없습니다.' });
+            return res.status(400).json({ message: '사용자를 찾을 수 없습니다.' });
         }
 
         // 비밀번호 비교
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            console.error('비밀번호가 틀렸습니다.');
-            return res.status(401).json({ message: '비밀번호가 틀렸습니다.' });
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
         }
 
-        // JWT 토큰 발급
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-        console.log('로그인 성공:', username);
+        const token = jwt.sign(
+            { userId: user._id },
+            process.env.JWT_SECRET
+        );
 
-        res.json({ token });
+        res.status(200).json({ message: '로그인 성공', token });
     } catch (error) {
-        console.error('로그인 중 오류 발생:', error.message);
+        console.error('로그인 오류:', error);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 });
+
+
 
 // 회원 탈퇴
 router.delete('/delete', authMiddleware, async (req, res) => {
