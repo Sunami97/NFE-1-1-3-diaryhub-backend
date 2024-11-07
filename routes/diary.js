@@ -219,48 +219,25 @@ router.get('/my-diaries', authMiddleware, async (req, res) => {
     }
 });
 
-//공개된 일기 조회
+// 공개된 일기 조회 (특정 지역 또는 전체)
 router.get('/public-diaries', authMiddlewareOptional, async (req, res) => {
     try {
-        const userId = req.user ? req.user.userId : null; // 현재 로그인한 사용자 ID 또는 null
-
+        const userId = req.user ? mongoose.Types.ObjectId(req.user.userId) : null; // 현재 로그인한 사용자 ID 또는 null
+        const { state } = req.query; // 쿼리로 요청된 시/도 정보
         const limit = parseInt(req.query.limit) || 10;
         const skip = parseInt(req.query.skip) || 0;
 
-        // 본인의 일기를 제외하고 공개된 일기만 조회
+        // 기본 쿼리 조건: 공개된 일기
         const query = { isPublic: true };
+
+        // 로그인된 사용자의 일기 제외
         if (userId) {
-            query.user = { $ne: userId }; // 로그인된 사용자의 ID가 있으면 본인의 일기 제외
+            query.user = { $ne: userId };
         }
 
-        const publicDiaries = await Diary.find(query)
-            .populate('user', '_id username') // 작성자 정보 포함
-            .sort({ createdAt: -1 })
-            .skip(skip) // 시작 위치 설정
-            .limit(limit); // 개수 제한
-
-        res.json(publicDiaries);
-    } catch (error) {
-        console.error('공개된 일기 조회 오류:', error.message);
-        res.status(500).json({ message: '서버 오류가 발생했습니다.' });
-    }
-});
-
-// 특정 지역의 공개된 일기를 조회
-router.get('/public-diaries/location/:state', authMiddlewareOptional, async (req, res) => {
-    try {
-        const { state } = req.params; // 요청된 시/도 정보
-        const userId = req.user ? mongoose.Types.ObjectId(req.user.userId) : null; // 로그인한 사용자 ID 또는 null
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = parseInt(req.query.skip) || 0;
-
-        // 쿼리 조건 설정
-        const query = {
-            isPublic: true,
-            'location.state': state, // 해당 지역의 일기만 필터링
-        };
-        if (userId) {
-            query.user = { $ne: userId }; // 로그인된 사용자의 ID가 있으면 본인의 일기 제외
+        // 특정 지역이 지정된 경우 (state가 "전체"가 아닐 때)
+        if (state && state !== '전체') {
+            query['location.state'] = state; // 해당 지역의 일기만 필터링
         }
 
         // 일기 조회 (최신순 정렬, skip과 limit 적용)
@@ -272,11 +249,10 @@ router.get('/public-diaries/location/:state', authMiddlewareOptional, async (req
 
         res.json(publicDiaries);
     } catch (error) {
-        console.error('지역별 공개 일기 조회 오류:', error.message);
+        console.error('공개된 일기 조회 오류:', error.message);
         res.status(500).json({ message: '서버 오류가 발생했습니다.' });
     }
 });
-
 
 // 특정 ID의 일기 정보 조회
 router.get('/:id', async (req, res) => {
