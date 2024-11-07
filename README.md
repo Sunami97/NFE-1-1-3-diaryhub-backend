@@ -28,9 +28,8 @@
 + 일기 수정: PUT /diaries/:id
 + 일기 삭제: DELETE /diaries/:id
 
-+ 공개된 일기 조회: GET /diaries/public-diaries
++ 공개된 일기 조회: GET /diaries/public-diaries?state=전체&limit=10&skip=0
 + 특정 사용자의 공개된 일기 조회: GET /diaries/public-diaries/:username
-+ 지역별 공개 일기 조회: GET /diaries/public-diaries/location/:state
 
 + 댓글 작성: POST /diaries/:id/comments
 + 댓글 조회: GET /diaries/:id/comments
