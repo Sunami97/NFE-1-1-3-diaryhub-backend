@@ -60,6 +60,8 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET
         );
 
+        console.log(`로그인: ${userId}`)
+
         res.status(200).json({ message: '로그인 성공', token });
     } catch (error) {
         console.error('로그인 오류:', error);
