@@ -222,7 +222,7 @@ router.get('/my-diaries', authMiddleware, async (req, res) => {
 // 공개된 일기 조회 (특정 지역 또는 전체)
 router.get('/public-diaries', authMiddlewareOptional, async (req, res) => {
     try {
-        const userId = req.user ? mongoose.Types.ObjectId(req.user.userId) : null; // 현재 로그인한 사용자 ID 또는 null
+        const userId = req.user ? req.user.userId : null;  // 현재 로그인한 사용자 ID 또는 null
         const { state } = req.query; // 쿼리로 요청된 시/도 정보
         const limit = parseInt(req.query.limit) || 10;
         const skip = parseInt(req.query.skip) || 0;
