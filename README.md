@@ -27,16 +27,16 @@
 + 일기 작성: POST /diaries
 + 일기 수정: PUT /diaries/:id
 + 일기 삭제: DELETE /diaries/:id
-
++ 나의 일기 조회: GET /diaries/my-diaries?state=전체&limit=10&skip=0
 + 공개된 일기 조회: GET /diaries/public-diaries?state=전체&limit=10&skip=0
-+ 특정 사용자의 공개된 일기 조회: GET /diaries/public-diaries/:username
++ 특정 사용자의 공개된 일기 조회: GET /diaries/public-diaries/:username?state=전체&limit=10&skip=0
+
 
 + 댓글 작성: POST /diaries/:id/comments
 + 댓글 조회: GET /diaries/:id/comments
 + 댓글 수정: PUT /diaries/:diaryId/comments/:commentId
 + 댓글 삭제: DELETE /diaries/:diaryId/comments/:commentId
 
+
 + 좋아요 추가/제거: POST /diaries/like/:id
 
-## 배포
-+ https://port-0-nfe-1-1-3-diaryhub-backend-m2tsapjdb0fe072f.sel4.cloudtype.app
