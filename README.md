@@ -2,6 +2,9 @@
 
 이 프로젝트는 Node.js와 Express를 기반으로 한 일기 관리 API 서버입니다. 이 서버는 일기 작성, 읽기, 수정, 삭제 기능과 사용자 인증을 제공합니다. 또한, 이미지 업로드(Cloudinary 사용), 위치 기반 필터링, 공개된 일기 조회 등의 기능을 지원합니다.
 
+[교환일기 웹사이트](https://nfe-1-1-3-diaryhub.vercel.app/)
+[프론트엔드 github](https://github.com/jinhyukSeo777/NFE-1-1-3-diaryhub)
+
 ## 주요 기능
 + 사용자 인증: bcryptjs를 사용한 비밀번호 암호화와 JWT 기반의 사용자 등록 및 로그인.
 + 일기 관리: 일기 작성, 수정, 삭제, 조회 기능 제공. 이미지 업로드와 위치 기반 필터링 지원.
@@ -30,13 +33,10 @@
 + 나의 일기 조회: GET /diaries/my-diaries?state=전체&limit=10&skip=0
 + 공개된 일기 조회: GET /diaries/public-diaries?state=전체&limit=10&skip=0
 + 특정 사용자의 공개된 일기 조회: GET /diaries/public-diaries/:username?state=전체&limit=10&skip=0
-
-
 + 댓글 작성: POST /diaries/:id/comments
 + 댓글 조회: GET /diaries/:id/comments
 + 댓글 수정: PUT /diaries/:diaryId/comments/:commentId
 + 댓글 삭제: DELETE /diaries/:diaryId/comments/:commentId
-
-
 + 좋아요 추가/제거: POST /diaries/like/:id
+
 
