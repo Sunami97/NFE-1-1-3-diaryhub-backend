@@ -22,21 +22,6 @@
 + multer를 사용한 파일 업로드
 + dotenv를 사용한 환경 변수 관리
 
-## API 사용법
-1. 사용자 관련 API
-+ 회원가입: POST /auth/signup
-+ 로그인: POST /auth/login
-2. 일기 관련 API
-+ 일기 작성: POST /diaries
-+ 일기 수정: PUT /diaries/:id
-+ 일기 삭제: DELETE /diaries/:id
-+ 나의 일기 조회: GET /diaries/my-diaries?state=전체&limit=10&skip=0
-+ 공개된 일기 조회: GET /diaries/public-diaries?state=전체&limit=10&skip=0
-+ 특정 사용자의 공개된 일기 조회: GET /diaries/public-diaries/:username?state=전체&limit=10&skip=0
-+ 댓글 작성: POST /diaries/:id/comments
-+ 댓글 조회: GET /diaries/:id/comments
-+ 댓글 수정: PUT /diaries/:diaryId/comments/:commentId
-+ 댓글 삭제: DELETE /diaries/:diaryId/comments/:commentId
-+ 좋아요 추가/제거: POST /diaries/like/:id
-
+## API 명세서
++ [교환일기API 명세서](https://lying-chord-ab6.notion.site/API-13d030eafe6580018841e749edd09fe1)
 
